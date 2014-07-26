@@ -24,15 +24,15 @@ from bson.objectid import ObjectId
 
 EMPTY = ("", " ", None, "None")
 
-def settings(logger, db_connection):
-    """Set the logger and MongoDB Connection
+def settings(db_connection):
+    """Set the MongoDB Connection
 
     Apply Model Indexes
 
     :Parameters:
-        - `logger`: instance of the Python Logger class
         - `db_connection`: instance of a pymongo Connection class
     """
+    logger = None
     _settings.LOGGER = logger
     _settings.DB_CONNECTION = db_connection
     ensure_indexes()
@@ -374,7 +374,8 @@ class Lazy(object):
         q = kwargs.pop('query', {})
         q.update({self._key:self._base._id})
         self._query.update(q)
-        self.logger.info(self._query)
+        if self.logger:
+            self.logger.info(self._query)
         return self._type.find(self._query, **kwargs)
 
     def _save(self, *args, **kwargs): pass
@@ -781,7 +782,8 @@ class Document(base):
         """
         errors = self._errors()
         if len(errors.keys()):
-            self.logger.error(errors) 
+            if self.logger:
+                self.logger.error(errors) 
             raise DocumentException(errors)
         if not self._id:
             self._save()
@@ -837,12 +839,15 @@ class Index(object):
 def ensure_indexes(typ=Document):
     for cls in typ.__subclasses__():
         try:
-            _settings.LOGGER.debug("Starting Indexing: %s" % cls.__name__)
+            if _settings.LOGGER:
+                _settings.LOGGER.debug("Starting Indexing: %s" % cls.__name__)
             cls.__ensureindexes__()
-            _settings.LOGGER.debug("Done Indexing: %s" % cls.__name__)
+            if _settings.LOGGER:
+                _settings.LOGGER.debug("Done Indexing: %s" % cls.__name__)
             ensure_indexes(cls)
         except Exception as e:
-            _settings.LOGGER.warning(e)
+            if _settings.LOGGER:
+                _settings.LOGGER.warning(e)
 
 
 

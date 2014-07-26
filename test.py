@@ -7,11 +7,7 @@ import humongolus.widget as widget
 from tests.states import states
 
 conn = Connection()
-FORMAT = '%(asctime)-15s %(message)s'
-logging.basicConfig(format=FORMAT)
-logger = logging.getLogger("humongolus")
-
-orm.settings(logger=logger, db_connection=conn)
+orm.settings(db_connection=conn)
 
 class Car(orm.Document):
     _db = "test"

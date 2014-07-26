@@ -13,11 +13,8 @@ import humongolus.widget as widget
 from humongolus.field import FieldException
 
 conn = Connection()
-FORMAT = '%(asctime)-15s %(message)s'
-logging.basicConfig(format=FORMAT, level=logging.DEBUG)
-logger = logging.getLogger("humongolus")
 
-orm.settings(logger=logger, db_connection=conn)
+orm.settings(db_connection=conn)
 
 class Field(unittest.TestCase):
 
