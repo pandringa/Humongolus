@@ -247,7 +247,6 @@ class Field(object):
     __args__ = ()
 
     def __init__(self, *args, **kwargs):
-        
         self.logger = _settings.LOGGER
         self._conn = _settings.DB_CONNECTION
         self.__kwargs__ = kwargs
@@ -568,7 +567,7 @@ class base(dict):
                 key = v._dbkey if v._dbkey else k
                 ns = ".".join([namespace, key]) if namespace else key
                 obj.update(v._save(namespace=ns))
-            except Exception as e: pass 
+            except Exception as e: pass
         return obj
     
     def _errors(self, namespace=None):
@@ -647,10 +646,13 @@ class Document(base):
         self.__hargskeys__ = set()
         self._conn = _settings.DB_CONNECTION        
         self._coll = self.__class__._connection()
+        self._coll_from = self._collection
         if kwargs.get('data'):
             self._map(kwargs.get('data'), init=True)
-        if kwargs.get('id'): 
-            self._doc(kwargs['id'])        
+        if kwargs.get('id'):
+            if kwargs.get('from_collection'):
+                self._coll_from = kwargs['from_collection']
+            self._doc(kwargs['id'])    
     """
     this is called by pymongo for each key:val pair for each document
     returned by find and find_one
@@ -669,7 +671,7 @@ class Document(base):
         elif key == '_id': self._id = val
 
     def _get_doc(self, id):
-        return _settings.DB_CONNECTION[self._db][self._collection].find_one({'_id':ObjectId(id)})
+        return _settings.DB_CONNECTION[self._db][self._coll_from].find_one({'_id':ObjectId(id)})
 
     def _doc(self, id):
         doc = self._get_doc(id)
@@ -848,7 +850,4 @@ def ensure_indexes(typ=Document):
         except Exception as e:
             if _settings.LOGGER:
                 _settings.LOGGER.warning(e)
-
-
-
 
